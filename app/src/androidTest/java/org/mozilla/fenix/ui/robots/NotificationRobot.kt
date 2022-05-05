@@ -16,7 +16,6 @@ import org.mozilla.fenix.helpers.TestAssetHelper.waitingTime
 import org.mozilla.fenix.helpers.TestHelper
 import org.mozilla.fenix.helpers.TestHelper.appName
 import org.mozilla.fenix.helpers.ext.waitNotNull
-import java.lang.AssertionError
 
 class NotificationRobot {
 
@@ -73,7 +72,13 @@ class NotificationRobot {
     }
 
     fun clickDownloadNotificationControlButton(action: String) {
-        assertTrue(downloadSystemNotificationButton(action).waitForExists(waitingTime))
+        // double check if notification actions are viewable by checking for action existence; otherwise scroll again
+        while (!downloadSystemNotificationButton(action).exists()) {
+            scrollToEnd()
+            notificationTray().ensureFullyVisible(downloadSystemNotificationButton(action))
+        }
+
+        // assertTrue(downloadSystemNotificationButton(action).waitForExists(waitingTime))
         downloadSystemNotificationButton(action).click()
 
         // API 30 Bug? Sometimes a click doesn't register, try again
@@ -92,22 +97,38 @@ class NotificationRobot {
         assertTrue(downloadSystemNotificationButton(action).waitForExists(waitingTime))
     }
 
-    fun expandNotificationMessage() {
+    fun expandDownloadNotificationMessage() {
         while (!notificationHeader.exists()) {
             scrollToEnd()
+            notificationTray().ensureFullyVisible(notificationHeader)
         }
 
-        if (notificationHeader.exists()) {
+        val notificationCollapsed =
+            notificationHeader
+                .getFromParent(UiSelector().description("Expand"))
+                .exists()
+
+        // val actionsButtons =
+        //     mDevice.findObject(
+        //         UiSelector()
+        //             .className("android.widget.FrameLayout")
+        //             .childSelector(
+        //                 UiSelector().text(appName)
+        //             )
+        //     ).getFromParent(
+        //         UiSelector().resourceId("android:id/actions_container")
+        //     )
+
+        if (notificationCollapsed) {
             // expand the notification
             notificationHeader.click()
-
-            // double check if notification actions are viewable by checking for action existence; otherwise scroll again
-            while (!mDevice.findObject(UiSelector().resourceId("android:id/action0")).exists() &&
-                !mDevice.findObject(UiSelector().resourceId("android:id/actions_container")).exists()
-            ) {
-                scrollToEnd()
-            }
         }
+
+        // // double check if notification actions are viewable by checking for action existence; otherwise scroll again
+        // while (!actionsButtons.exists()) {
+        //     scrollToEnd()
+        //     notificationTray().ensureFullyVisible(actionsButtons)
+        // }
     }
 
     class Transition {

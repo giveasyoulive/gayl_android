@@ -46,18 +46,18 @@ class DownloadTest {
         // disabling the PWA CFR on 3rd visit
         featureSettingsHelper.disablePwaCFR(true)
         // clear all existing notifications
-        notificationShade {
-            mDevice.openNotification()
-            clearNotifications()
-        }
+        // notificationShade {
+        //     mDevice.openNotification()
+        //     clearNotifications()
+        // }
     }
 
     @After
     fun tearDown() {
         featureSettingsHelper.resetAllFeatureFlags()
-        notificationShade {
-            cancelAllShownNotifications()
-        }
+        // notificationShade {
+        //     cancelAllShownNotifications()
+        // }
     }
 
     @Test
@@ -113,7 +113,7 @@ class DownloadTest {
         }
     }
 
-    @Ignore("Intermittent: https://github.com/mozilla-mobile/fenix/issues/23434")
+    // @Ignore("Intermittent: https://github.com/mozilla-mobile/fenix/issues/23434")
     @SmokeTest
     @Test
     fun pauseResumeCancelDownloadTest() {
@@ -128,7 +128,7 @@ class DownloadTest {
         mDevice.openNotification()
         notificationShade {
             verifySystemNotificationExists("Firefox Fenix")
-            expandNotificationMessage()
+            expandDownloadNotificationMessage()
             clickDownloadNotificationControlButton("PAUSE")
             clickDownloadNotificationControlButton("RESUME")
             clickDownloadNotificationControlButton("CANCEL")
