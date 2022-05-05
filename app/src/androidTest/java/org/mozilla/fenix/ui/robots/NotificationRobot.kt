@@ -7,6 +7,7 @@ package org.mozilla.fenix.ui.robots
 import android.app.NotificationManager
 import android.content.Context
 import androidx.test.uiautomator.By.text
+import androidx.test.uiautomator.UiObjectNotFoundException
 import androidx.test.uiautomator.UiScrollable
 import androidx.test.uiautomator.UiSelector
 import androidx.test.uiautomator.Until
@@ -72,15 +73,20 @@ class NotificationRobot {
     }
 
     fun clickDownloadNotificationControlButton(action: String) {
-        // double check if notification actions are viewable by checking for action existence; otherwise scroll again
-        while (!downloadSystemNotificationButton(action).exists()) {
-            scrollToEnd()
-            notificationTray().ensureFullyVisible(downloadSystemNotificationButton(action))
+        try {
+            // double check if notification actions are viewable by checking for action existence; otherwise scroll again
+            while (!downloadSystemNotificationButton(action).exists()) {
+                scrollToEnd()
+                notificationTray().ensureFullyVisible(downloadSystemNotificationButton(action))
+            }
+
+            // assertTrue(downloadSystemNotificationButton(action).waitForExists(waitingTime))
+            downloadSystemNotificationButton(action).click()
+        } catch (e: UiObjectNotFoundException) {
+            if (expandNotificationButton.contentDescription.equals("Expand"))
+                expandNotificationButton.click()
+            downloadSystemNotificationButton(action).click()
         }
-
-        // assertTrue(downloadSystemNotificationButton(action).waitForExists(waitingTime))
-        downloadSystemNotificationButton(action).click()
-
         // API 30 Bug? Sometimes a click doesn't register, try again
         try {
             assertTrue(downloadSystemNotificationButton(action).waitUntilGone(waitingTime))
@@ -103,32 +109,10 @@ class NotificationRobot {
             notificationTray().ensureFullyVisible(notificationHeader)
         }
 
-        val notificationCollapsed =
-            notificationHeader
-                .getFromParent(UiSelector().description("Expand"))
-                .exists()
-
-        // val actionsButtons =
-        //     mDevice.findObject(
-        //         UiSelector()
-        //             .className("android.widget.FrameLayout")
-        //             .childSelector(
-        //                 UiSelector().text(appName)
-        //             )
-        //     ).getFromParent(
-        //         UiSelector().resourceId("android:id/actions_container")
-        //     )
-
-        if (notificationCollapsed) {
+        if (expandNotificationButton.contentDescription.equals("Expand")) {
             // expand the notification
             notificationHeader.click()
         }
-
-        // // double check if notification actions are viewable by checking for action existence; otherwise scroll again
-        // while (!actionsButtons.exists()) {
-        //     scrollToEnd()
-        //     notificationTray().ensureFullyVisible(actionsButtons)
-        // }
     }
 
     class Transition {
@@ -192,3 +176,9 @@ private fun cancelAll() {
         TestHelper.appContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     notificationManager.cancelAll()
 }
+
+private val expandNotificationButton =
+    notificationHeader
+        .getFromParent(
+            UiSelector().resourceId("android:id/expand_button")
+        )
