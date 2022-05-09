@@ -26,6 +26,8 @@ import mozilla.components.concept.base.crash.CrashReporting
 import mozilla.components.concept.engine.DefaultSettings
 import mozilla.components.concept.engine.Engine
 import mozilla.components.concept.engine.mediaquery.PreferredColorScheme
+import mozilla.components.concept.engine.webextension.MessageHandler
+import mozilla.components.concept.engine.webextension.Port
 import mozilla.components.concept.fetch.Client
 import mozilla.components.feature.customtabs.store.CustomTabsServiceStore
 import mozilla.components.feature.downloads.DownloadMiddleware
@@ -67,12 +69,15 @@ import mozilla.components.service.sync.autofill.AutofillCreditCardsAddressesStor
 import mozilla.components.service.sync.logins.SyncableLoginsStorage
 import mozilla.components.support.base.worker.Frequency
 import mozilla.components.support.locale.LocaleManager
+import org.json.JSONObject
 import org.mozilla.fenix.AppRequestInterceptor
 import org.mozilla.fenix.BuildConfig
 import org.mozilla.fenix.Config
 import org.mozilla.fenix.IntentReceiverActivity
 import org.mozilla.fenix.R
+import org.mozilla.fenix.components.feature.giveasyoulive.provider.DonationReminderAdvertProvider
 import org.mozilla.fenix.components.search.SearchMigration
+import org.mozilla.fenix.components.feature.giveasyoulive.storage.DonationReminderAdvertDefaultStorage
 import org.mozilla.fenix.downloads.DownloadService
 import org.mozilla.fenix.ext.components
 import org.mozilla.fenix.ext.settings
@@ -89,7 +94,9 @@ import org.mozilla.fenix.tabstray.SearchTermTabGroupMiddleware
 import org.mozilla.fenix.telemetry.TelemetryMiddleware
 import org.mozilla.fenix.utils.getUndoDelay
 import org.mozilla.geckoview.GeckoRuntime
+import java.util.Base64
 import java.util.concurrent.TimeUnit
+
 
 /**
  * Component group for all core browser functionality.
@@ -189,6 +196,8 @@ class Core(
         }
     }
 
+    var notificationToken: String? = null
+
     /**
      * The [BrowserStore] holds the global [BrowserState].
      */
@@ -237,6 +246,42 @@ class Core(
 
             // Install the "cookies" WebExtension and tracks user interaction with SERPs.
             searchTelemetry.install(engine, this)
+
+            // Install the "Give as you Live" WebExtension.
+            engine.installWebExtension(
+                id =  "gayl_firefox@everyclick.com",
+                url =  "resource://android/assets/extensions/gayl-donation-reminder/",
+                onSuccess = { extension ->
+
+                    // Once, the extension is loaded.  Transfer the notification token to the website
+                    val messageHandler: MessageHandler = object :
+                        MessageHandler {
+
+                        // A native port has been connected by the extension
+                        override fun onPortConnected(port: Port) {
+
+                            // Post the latest notification token to the extension - so, it can be saved as a cookie
+                            var token = context.getSharedPreferences("mozac_feature_push", Context.MODE_PRIVATE ).getString("token", null)
+
+                            if(token != null) {
+                                val message = JSONObject()
+
+                                message.put("token", Base64.getEncoder().encodeToString(token.toByteArray()))
+
+                                port.postMessage(message)
+                            }
+
+                        }
+
+                    }
+
+                    // Listen for DonationReminderNotification native messages
+                    extension.registerBackgroundMessageHandler("DonationReminderNotification", messageHandler)
+                  },
+
+                onError = { _, throwable ->
+                    print(throwable)
+                })
 
             WebNotificationFeature(
                 context, engine, icons, R.drawable.ic_status_logo,
@@ -339,6 +384,25 @@ class Core(
     }
     val pocketStoriesService by lazyMonitored { PocketStoriesService(context, pocketStoriesConfig) }
 
+    // DONATION_REMINDER
+    val donationReminderAdvertProvider by lazyMonitored {
+        DonationReminderAdvertProvider(
+            context = context,
+            client = client,
+            maxCacheAgeInMinutes = CONTILE_MAX_CACHE_AGE
+        )
+    }
+
+    val donationReminderAdvertStorage by lazyMonitored {
+
+        DonationReminderAdvertDefaultStorage(
+            advertProvider = donationReminderAdvertProvider
+        )
+    }
+
+    // DONATION_REMINDER
+
+
     val contileTopSitesProvider by lazyMonitored {
         ContileTopSitesProvider(
             context = context,
@@ -355,6 +419,7 @@ class Core(
             frequency = Frequency(3, TimeUnit.HOURS)
         )
     }
+
 
     val topSitesStorage by lazyMonitored {
         val defaultTopSites = mutableListOf<Pair<String, String>>()

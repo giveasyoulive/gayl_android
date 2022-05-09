@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
@@ -39,6 +40,7 @@ import org.mozilla.fenix.ext.runIfFragmentIsAttached
 import org.mozilla.fenix.ext.settings
 import org.mozilla.fenix.shortcut.PwaOnboardingObserver
 import org.mozilla.fenix.theme.ThemeManager
+import mozilla.components.feature.toolbar.WebExtensionToolbarFeature
 
 /**
  * Fragment used for browsing the web within the main app.
@@ -48,6 +50,7 @@ class BrowserFragment : BaseBrowserFragment(), UserInteractionHandler {
 
     private val windowFeature = ViewBoundFeatureWrapper<WindowFeature>()
     private val openInAppOnboardingObserver = ViewBoundFeatureWrapper<OpenInAppOnboardingObserver>()
+    private val webExtToolbarFeature = ViewBoundFeatureWrapper<WebExtensionToolbarFeature>()
 
     private var readerModeAvailable = false
     private var pwaOnboardingObserver: PwaOnboardingObserver? = null
@@ -225,6 +228,16 @@ class BrowserFragment : BaseBrowserFragment(), UserInteractionHandler {
             view = view
         )
 
+
+        webExtToolbarFeature.set(
+            feature = WebExtensionToolbarFeature(
+                browserToolbarView.view,
+                store = components.core.store
+            ),
+            owner = this,
+            view = view
+        )
+
         if (context.settings().shouldShowOpenInAppCfr) {
             openInAppOnboardingObserver.set(
                 feature = OpenInAppOnboardingObserver(
@@ -241,6 +254,7 @@ class BrowserFragment : BaseBrowserFragment(), UserInteractionHandler {
                 view = view
             )
         }
+
     }
 
     override fun onStart() {

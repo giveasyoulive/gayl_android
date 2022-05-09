@@ -12,7 +12,7 @@ apply plugin: 'jacoco'
 apply plugin: 'androidx.navigation.safeargs.kotlin'
 apply plugin: 'com.google.android.gms.oss-licenses-plugin'
 apply plugin: 'androidx.benchmark'
-
+apply plugin: 'com.google.gms.google-services'
 
 import com.android.build.OutputFile
 import groovy.json.JsonOutput
@@ -24,6 +24,21 @@ import static org.gradle.api.tasks.testing.TestResult.ResultType
 apply from: 'benchmark.gradle'
 
 android {
+
+    signingConfigs {
+        donationReminderRelease {
+            storeFile file(gradle.getProperty("localProperties.build.storeFile"))
+            storePassword gradle.getProperty("localProperties.build.storePassword")
+            keyAlias gradle.getProperty("localProperties.build.keyAlias")
+            keyPassword gradle.getProperty("localProperties.build.keyPassword")
+        }
+        donationReminderDebug {
+            storeFile file(gradle.getProperty("localProperties.build.storeFile"))
+            storePassword gradle.getProperty("localProperties.build.storePassword")
+            keyAlias gradle.getProperty("localProperties.build.keyAlias")
+            keyPassword gradle.getProperty("localProperties.build.keyPassword")
+        }
+    }
     compileSdkVersion Config.compileSdkVersion
 
     project.maybeConfigForJetpackBenchmark(it)
@@ -34,7 +49,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "org.mozilla"
+        applicationId "org.giveasyoulive"
         minSdkVersion Config.minSdkVersion
         targetSdkVersion Config.targetSdkVersion
         versionCode 1
@@ -47,8 +62,8 @@ android {
         buildConfigField "String", "GIT_HASH", "\"\"" // see override in release builds for why it's blank.
         // This should be the "public" base URL of AMO.
         buildConfigField "String", "AMO_BASE_URL", "\"https://addons.mozilla.org\""
-        buildConfigField "String", "AMO_COLLECTION_NAME", "\"7dfae8669acc4312a65e8ba5553036\""
-        buildConfigField "String", "AMO_COLLECTION_USER", "\"mozilla\""
+        buildConfigField "String", "AMO_COLLECTION_NAME", "\"gayl-browser-addons\""
+        buildConfigField "String", "AMO_COLLECTION_USER", "\"5605734\""
         // These add-ons should be excluded for Mozilla Online builds.
         buildConfigField "String[]", "MOZILLA_ONLINE_ADDON_EXCLUSIONS",
                 "{" +
@@ -68,6 +83,7 @@ android {
         manifestPlaceholders = [
                 "deepLinkScheme": deepLinkSchemeValue
         ]
+        signingConfig signingConfigs.donationReminderRelease
 
         // Build flag for "Mozilla Online" variants. See `Config.isMozillaOnline`.
         if (project.hasProperty("mozillaOnline") || gradle.hasProperty("localProperties.mozillaOnline")) {
@@ -75,6 +91,12 @@ android {
         } else {
             buildConfigField "boolean", "MOZILLA_ONLINE", "false"
         }
+        resConfigs "en"
+
+        buildConfigField 'String', 'ADVERT_AUTHORIZATION', gradle.getProperty("localProperties.advert.authorization")
+        buildConfigField 'String', 'ADVERT_USERNAME', gradle.getProperty("localProperties.advert.username")
+        buildConfigField 'String', 'ADVERT_PASSWORD', gradle.getProperty("localProperties.advert.password")
+        buildConfigField 'String', 'ADVERT_SECURITYCODE', gradle.getProperty("localProperties.advert.deviceSecurityCode")
     }
 
     def releaseTemplate = {
@@ -87,7 +109,7 @@ android {
 
         // Changing the build config can cause files that depend on BuildConfig.java to recompile
         // so we only set the git hash in release builds to avoid possible recompilation in debug builds.
-        buildConfigField "String", "GIT_HASH", "\"${Config.getGitHash()}\""
+        //buildConfigField "String", "GIT_HASH", "\"${Config.getGitHash()}\""
 
         if (gradle.hasProperty("localProperties.autosignReleaseWithDebugKey")) {
             signingConfig signingConfigs.debug
@@ -147,6 +169,23 @@ android {
                     "deepLinkScheme": deepLinkSchemeValue
             ]
         }
+        donationReminderDebug releaseTemplate >> {
+            shrinkResources false
+            minifyEnabled false
+            applicationIdSuffix ".donationreminder"
+            resValue "bool", "IS_DEBUG", "true"
+            pseudoLocalesEnabled true
+        }
+        donationReminderRelease releaseTemplate >> {
+            applicationIdSuffix ".donationreminder"
+            def deepLinkSchemeValue = "fenix"
+            buildConfigField "boolean", "USE_RELEASE_VERSIONING", "true"
+            buildConfigField "String", "DEEP_LINK_SCHEME", "\"$deepLinkSchemeValue\""
+            manifestPlaceholders = [
+                    "sharedUserId"  : "org.giveasyoulive.donationreminder.sharedID",
+                    "deepLinkScheme": deepLinkSchemeValue
+            ]
+        }
     }
 
     buildFeatures {
@@ -203,6 +242,10 @@ android {
         exclude 'META-INF/atomicfu.kotlin_module'
         exclude 'META-INF/AL2.0'
         exclude 'META-INF/LGPL2.1'
+
+        jniLibs {
+            useLegacyPackaging = true
+        }
     }
 
     testOptions {
@@ -237,16 +280,16 @@ android.applicationVariants.all { variant ->
 
     def isDebug = variant.buildType.resValues['IS_DEBUG']?.value ?: false
     def useReleaseVersioning = variant.buildType.buildConfigFields['USE_RELEASE_VERSIONING']?.value ?: false
-    def versionName = variant.buildType.name == 'nightly' ? Config.nightlyVersionName() : Config.releaseVersionName(project)
+    def versionName = variant.buildType.name == 'donationReminderRelease' ? Config.generateDebugVersionName() : variant.buildType.name == 'nightly' ? Config.nightlyVersionName() : Config.releaseVersionName(project)
 
     println("----------------------------------------------")
     println("Variant name:      " + variant.name)
     println("Application ID:    " + [variant.mergedFlavor.applicationId, variant.buildType.applicationIdSuffix].findAll().join())
     println("Build type:        " + variant.buildType.name)
     println("Flavor:            " + variant.flavorName)
-    println("Telemetry enabled: " + !isDebug)
 
     if (useReleaseVersioning) {
+
         // The Google Play Store does not allow multiple APKs for the same app that all have the
         // same version code. Therefore we need to have different version codes for our ARM and x86
         // builds.
@@ -274,22 +317,8 @@ android.applicationVariants.all { variant ->
 // -------------------------------------------------------------------------------------------------
 
     buildConfigField 'String', 'SENTRY_TOKEN', 'null'
-    if (!isDebug) {
-        buildConfigField 'boolean', 'CRASH_REPORTING', 'true'
-        // Reading sentry token from local file (if it exists). In a release task on taskcluster it will be available.
-        try {
-            def token = new File("${rootDir}/.sentry_token").text.trim()
-            buildConfigField 'String', 'SENTRY_TOKEN', '"' + token + '"'
-        } catch (FileNotFoundException ignored) {}
-    } else {
-        buildConfigField 'boolean', 'CRASH_REPORTING', 'false'
-    }
-
-    if (!isDebug) {
-        buildConfigField 'boolean', 'TELEMETRY', 'true'
-    } else {
-        buildConfigField 'boolean', 'TELEMETRY', 'false'
-    }
+    buildConfigField 'boolean', 'CRASH_REPORTING', 'false'
+    buildConfigField 'boolean', 'TELEMETRY', 'false'
 
     def buildDate = Config.generateBuildDate()
     // Setting buildDate with every build changes the generated BuildConfig, which slows down the
@@ -535,6 +564,7 @@ dependencies {
     implementation Deps.mozilla_lib_state
     implementation Deps.mozilla_lib_dataprotect
     debugImplementation Deps.leakcanary
+    donationReminderDebugImplementation Deps.leakcanary
 
     implementation Deps.androidx_compose_ui
     implementation Deps.androidx_compose_ui_tooling
@@ -623,6 +653,17 @@ dependencies {
     // depend on a separate library for unit tests. This will be removed in future releases.
     testImplementation "org.mozilla.telemetry:glean-native-forUnitTests:${project.ext.glean_version}"
 
+    implementation platform('com.google.firebase:firebase-bom:28.4.0')
+    implementation 'com.google.firebase:firebase-messaging-ktx'
+
+    def glide="4.13.0"
+    implementation "com.github.bumptech.glide:glide:$glide"
+    annotationProcessor "com.github.bumptech.glide:compiler:$glide"
+
+    def accompanist="0.24.5-alpha"
+    implementation "com.google.accompanist:accompanist-permissions:$accompanist"
+    implementation "com.google.accompanist:accompanist-pager:$accompanist"
+
     lintChecks project(":mozilla-lint-rules")
 }
 
@@ -630,6 +671,7 @@ protobuf {
     // Mac M1 workaround until we can bump the version. Dependent on A-S.
     // See https://github.com/mozilla-mobile/fenix/issues/22321
     protoc {
+
         if (osdetector.os == "osx") {
             artifact = "${Deps.protobuf_compiler}:osx-x86_64"
         } else {
@@ -731,7 +773,7 @@ task buildTranslationArray {
     fileTree("src/main/res").visit { FileVisitDetails details ->
         if(details.file.path.endsWith("${File.separator}strings.xml")){
             def languageCode = details.file.parent.tokenize(File.separator).last().replaceAll('values-','').replaceAll('-r','-')
-            languageCode = (languageCode == "values") ? "en-US" : languageCode
+            languageCode = (languageCode == "values") ? "en-GB" : languageCode
             foundLocales.append("\"").append(languageCode).append("\"").append(",")
         }
     }
@@ -836,6 +878,23 @@ android.applicationVariants.all { variant ->
         dependsOn "package${variant.name.capitalize()}"
     }
 }
+
+
+// Copy latest donation reminder extension source code
+task copyFiles(type: Copy) {
+    from '/var/everyclick/development/donation-reminder/dist/gayl-donation-reminder'
+    into '/var/everyclick/development/android/fenix/app/src/main/assets/extensions/gayl-donation-reminder'
+}
+
+tasks.register("updateGaylExtensionVersion", Copy) { task ->
+    updateExtensionVersion(task, 'src/main/assets/extensions/gayl-donation-reminder')
+}
+tasks.updateGaylExtensionVersion {
+    dependsOn(copyFiles)
+}
+
+preBuild.dependsOn(copyFiles)
+preBuild.dependsOn "updateGaylExtensionVersion"
 
 // Enable expiration by major version.
 ext.gleanExpireByVersion = Config.majorVersion(project)

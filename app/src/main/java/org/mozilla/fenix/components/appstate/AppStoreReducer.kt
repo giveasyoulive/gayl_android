@@ -44,7 +44,11 @@ internal object AppStoreReducer {
                 action.recentHistory.filterOut(recentSearchGroup?.searchTerm)
             } else {
                 action.recentHistory
-            }
+            },
+
+            // DONATION_REMINDER
+            donationReminderAdverts = action.donationReminderAdverts
+            // DONATION_REMINDER
         )
         is AppAction.CollectionExpanded -> {
             val newExpandedCollection = state.expandedCollections.toMutableSet()
@@ -81,6 +85,11 @@ internal object AppStoreReducer {
             )
         }
         is AppAction.RecentBookmarksChange -> state.copy(recentBookmarks = action.recentBookmarks)
+
+        // DONATION_REMINDER
+        is AppAction.DonationReminderAdvertChange -> state.copy(donationReminderAdverts = action.donationReminderAdverts)
+        // DONATION_REMINDER
+
         is AppAction.RemoveRecentBookmark -> {
             state.copy(recentBookmarks = state.recentBookmarks.filterNot { it.url == action.recentBookmark.url })
         }

@@ -145,18 +145,6 @@ class HomeMenu(
             onItemTapped.invoke(Item.Extensions)
         }
 
-        val whatsNewItem = BrowserMenuHighlightableItem(
-            context.getString(R.string.browser_menu_whats_new),
-            R.drawable.ic_whats_new,
-            iconTintColorResource = primaryTextColor,
-            highlight = BrowserMenuHighlight.LowPriority(
-                notificationTint = getColor(context, R.color.fx_mobile_icon_color_information)
-            ),
-            isHighlighted = { WhatsNew.shouldHighlightWhatsNew(context) }
-        ) {
-            onItemTapped.invoke(Item.WhatsNew)
-        }
-
         val helpItem = BrowserMenuImageText(
             context.getString(R.string.browser_menu_help),
             R.drawable.mozac_ic_help,
@@ -204,7 +192,6 @@ class HomeMenu(
             BrowserMenuDivider(),
             desktopItem,
             BrowserMenuDivider(),
-            whatsNewItem,
             helpItem,
             customizeHomeItem,
             settingsItem,

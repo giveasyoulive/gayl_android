@@ -642,6 +642,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
      */
     val shouldUseFixedTopToolbar: Boolean
         get() {
+
             return touchExplorationIsEnabled || switchServiceIsEnabled
         }
 
@@ -708,8 +709,8 @@ class Settings(private val appContext: Context) : PreferencesHolder {
 
     var shouldUseBottomToolbar by booleanPreference(
         appContext.getPreferenceKey(R.string.pref_key_toolbar_bottom),
-        // Default accessibility users to top toolbar
-        default = !touchExplorationIsEnabled && !switchServiceIsEnabled
+        // Default Bar Location - GAYL wishes
+        default = false
     )
 
     val toolbarPosition: ToolbarPosition
@@ -829,20 +830,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
 
     val shouldShowPwaCfr: Boolean
         get() {
-            if (!canShowCfr) return false
-            // We only want to show this on the 3rd time a user visits a site
-            if (userNeedsToVisitInstallableSites) return false
-
-            // ShortcutManager::pinnedShortcuts is only available on Oreo+
-            if (!userKnowsAboutPwas && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val manager = appContext.getSystemService(ShortcutManager::class.java)
-                val alreadyHavePwaInstalled = manager != null && manager.pinnedShortcuts.size > 0
-
-                // Users know about PWAs onboarding if they already have PWAs installed.
-                userKnowsAboutPwas = alreadyHavePwaInstalled
-            }
-            // Show dialog only if user does not know abut PWAs
-            return !userKnowsAboutPwas
+            return false
         }
 
     var userKnowsAboutPwas by booleanPreference(

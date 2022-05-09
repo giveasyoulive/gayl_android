@@ -10,6 +10,7 @@ import mozilla.components.lib.crash.Crash.NativeCodeCrash
 import mozilla.components.lib.state.Action
 import mozilla.components.service.pocket.PocketRecommendedStory
 import org.mozilla.fenix.components.AppStore
+import org.mozilla.fenix.components.feature.giveasyoulive.model.DonationReminderAdvert
 import org.mozilla.fenix.home.Mode
 import org.mozilla.fenix.home.pocket.PocketRecommendedStoriesCategory
 import org.mozilla.fenix.home.pocket.PocketRecommendedStoriesSelectedCategory
@@ -37,7 +38,11 @@ sealed class AppAction : Action {
         val showCollectionPlaceholder: Boolean,
         val recentTabs: List<RecentTab>,
         val recentBookmarks: List<RecentBookmark>,
-        val recentHistory: List<RecentlyVisitedItem>
+        val recentHistory: List<RecentlyVisitedItem>,
+
+        // DONATION_REMINDER
+        val donationReminderAdverts: List<DonationReminderAdvert>,
+        // DONATION_REMINDER
     ) :
         AppAction()
 
@@ -52,6 +57,11 @@ sealed class AppAction : Action {
     data class RecentBookmarksChange(val recentBookmarks: List<RecentBookmark>) : AppAction()
     data class RemoveRecentBookmark(val recentBookmark: RecentBookmark) : AppAction()
     data class RecentHistoryChange(val recentHistory: List<RecentlyVisitedItem>) : AppAction()
+
+    // DONATION_REMINDER
+    data class DonationReminderAdvertChange(val donationReminderAdverts: List<DonationReminderAdvert>) : AppAction()
+    // DONATION_REMINDER
+
     data class RemoveRecentHistoryHighlight(val highlightUrl: String) : AppAction()
     data class DisbandSearchGroupAction(val searchTerm: String) : AppAction()
     data class SelectPocketStoriesCategory(val categoryName: String) : AppAction()

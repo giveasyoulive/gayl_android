@@ -14,6 +14,7 @@ import mozilla.components.feature.tab.collections.TabCollection
 import mozilla.components.feature.top.sites.TopSite
 import mozilla.components.service.pocket.PocketRecommendedStory
 import org.mozilla.fenix.components.appstate.AppState
+import org.mozilla.fenix.components.feature.giveasyoulive.model.DonationReminderAdvert
 import org.mozilla.fenix.gleanplumb.Message
 import org.mozilla.fenix.ext.components
 import org.mozilla.fenix.ext.settings
@@ -39,7 +40,10 @@ internal fun normalModeAdapterItems(
     nimbusMessageCard: Message? = null,
     recentTabs: List<RecentTab>,
     recentVisits: List<RecentlyVisitedItem>,
-    pocketStories: List<PocketRecommendedStory>
+    pocketStories: List<PocketRecommendedStory>,
+    // DONATION_REMINDER
+    donationReminderAdverts: List<DonationReminderAdvert>
+    // DONATION_REMINDER
 ): List<AdapterItem> {
     val items = mutableListOf<AdapterItem>()
     var shouldShowCustomizeHome = false
@@ -50,6 +54,12 @@ internal fun normalModeAdapterItems(
     nimbusMessageCard?.let {
         items.add(AdapterItem.NimbusMessageCard(it))
     }
+
+    // DONATION_REMINDER
+    if(donationReminderAdverts.isNotEmpty()) {
+        items.add(AdapterItem.DonationReminderAdverts)
+    }
+    // DONATION_REMINDER
 
     if (settings.showTopSitesFeature && topSites.isNotEmpty()) {
         items.add(AdapterItem.TopSitePager(topSites))
@@ -117,25 +127,22 @@ private fun showCollections(
 private fun privateModeAdapterItems() = listOf(AdapterItem.PrivateBrowsingDescription)
 
 private fun onboardingAdapterItems(onboardingState: OnboardingState): List<AdapterItem> {
+    print(onboardingState);
+
     val items: MutableList<AdapterItem> = mutableListOf(AdapterItem.OnboardingHeader)
 
     items.addAll(
         listOf(
             AdapterItem.OnboardingThemePicker,
             AdapterItem.OnboardingToolbarPositionPicker,
-            AdapterItem.OnboardingTrackingProtection
         )
     )
     // Customize FxA items based on where we are with the account state:
+
     items.addAll(
-        when (onboardingState) {
-            OnboardingState.SignedOutNoAutoSignIn -> {
-                listOf(
-                    AdapterItem.OnboardingManualSignIn
-                )
-            }
-            OnboardingState.SignedIn -> listOf()
-        }
+        listOf(
+            AdapterItem.OnboardingManualSignIn
+        )
     )
 
     items.addAll(
@@ -160,7 +167,10 @@ private fun AppState.toAdapterList(settings: Settings): List<AdapterItem> = when
         messaging.messageToShow,
         recentTabs,
         recentHistory,
-        pocketStories
+        pocketStories,
+        // DONATION_REMINDER
+        donationReminderAdverts
+        // DONATION_REMINDER
     )
     is Mode.Private -> privateModeAdapterItems()
     is Mode.Onboarding -> onboardingAdapterItems(mode.state)
@@ -199,7 +209,10 @@ class SessionControlView(
                 override fun onLayoutCompleted(state: RecyclerView.State?) {
                     super.onLayoutCompleted(state)
 
-                    JumpBackInCFRDialog(view).showIfNeeded()
+                    // DONATION_REMINDER - hide silly message
+                    //JumpBackInCFRDialog(view).showIfNeeded()
+                    // DONATION_REMINDER
+
                 }
             }
             val itemTouchHelper =

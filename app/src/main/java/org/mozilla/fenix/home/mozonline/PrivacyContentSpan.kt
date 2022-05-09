@@ -19,7 +19,7 @@ object Position {
 object ADDR {
     const val URL1 = "https://www.mozilla.org/en-US/MPL/"
     const val URL2 = "https://www.mozilla.org/en-US/foundation/trademarks/policy/"
-    const val URL3 = "https://www.mozilla.org/zh-CN/privacy/firefox/"
+    const val URL3 = "https://www.giveasyoulive.com/privacy"
 }
 
 class PrivacyContentSpan(var pos: Int, var context: Context) :

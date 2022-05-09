@@ -197,6 +197,7 @@ class HistoryFragment : LibraryPageFragment<History>(), UserInteractionHandler {
     override fun onResume() {
         super.onResume()
 
+
         (activity as NavHostActivity).getSupportActionBarAndInflateIfNecessary().show()
     }
 

@@ -1,0 +1,239 @@
+<!--
+	Template for the popup window.
+
+	Note: Scripts / CSS gets injected automatically when the extension is built, so there is no need
+	to include JS / CSS here, include them (using require) in popup.js and they will appear here.
+
+	@author Daniel Moffat
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=0.75, maximum-scale=0.75, minimum-scale=0.75">
+<link href=".././styles/css/popup.css" rel="stylesheet"></head>
+<body class="popup">
+	<!-- Global loading state -->
+	<div class="loading js-loading"></div>
+
+	<!-- Global error state -->
+	<div class="js-global-error global-error"></div>
+
+	<!-- Permissions page - Shown to users who haven't given us sufficient permissions -->
+	<div id="permission" class="permissions js-page" style="display:none;">
+		<p>Please change your settings to activate the Give as you Live Donation Reminder. <br /></p>
+		<p>For instructions on how to do this, please click below.</p>
+		<p>
+			<a href="" class="btn btn-primary js-permissions">
+			Change settings <svg class="svg-inline--fa fa-angle-right fa-w-8 fa-fw" aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512"><path fill="currentColor" d="M224.3 273l-136 136c-9.4 9.4-24.6 9.4-33.9 0l-22.6-22.6c-9.4-9.4-9.4-24.6 0-33.9l96.4-96.4-96.4-96.4c-9.4-9.4-9.4-24.6 0-33.9L54.3 103c9.4-9.4 24.6-9.4 33.9 0l136 136c9.5 9.4 9.5 24.6.1 34z"></path></svg>
+		</a>
+		</p>
+	</div>
+
+	<!-- Login page - Only shown to anonymous users -->
+	<div id="login" class="login js-page" style="display:none;">
+		<h1 class="login__title">Log in to use the <span class="new-line">Donation Reminder</span></h1>
+		<form class="login__form js-login">
+			<label class="login__form__label" for="email">
+				Email address
+				<input class="form-control login__form__input js-login-email" required name="email" type="email" value="" placeholder="e.g. your@email.com" tabindex="1" />
+			</label>
+			<label class="login__form__label" for="password">
+				Password
+				<input class="form-control login__form__input js-login-password" required name="password" type="password" value="" placeholder="Password" tabindex="2" />
+			</label>
+
+			<div class="alert alert--danger text-center js-login-error" style="display:none;">
+				Error message goes here
+			</div>
+
+			<!-- Login form loading state -->
+			<div class="loading js-login-loading"></div>
+
+			<button class="js-submit btn btn-lg btn-gaylgreen btn-block login__submit" type="submit" tabindex="3">
+				Log in
+				<svg class="svg-inline--fa fa-angle-right fa-w-8 fa-fw" aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512"><path fill="currentColor" d="M224.3 273l-136 136c-9.4 9.4-24.6 9.4-33.9 0l-22.6-22.6c-9.4-9.4-9.4-24.6 0-33.9l96.4-96.4-96.4-96.4c-9.4-9.4-9.4-24.6 0-33.9L54.3 103c9.4-9.4 24.6-9.4 33.9 0l136 136c9.5 9.4 9.5 24.6.1 34z"></path></svg>
+			</button>
+			<span class="js-forgotten-password text-center pseudo-link login__form__forgottenpassword">Forgotten password?</span>
+		</form>
+
+		<p class="text-center">or...</p>
+		<button class="btn btn-block btn-outline-facebook btn-fill-white js-facebook-login">
+			Log in with Facebook <svg class="svg-inline--fa fa-angle-right fa-w-8 fa-fw" aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512"><path fill="currentColor" d="M224.3 273l-136 136c-9.4 9.4-24.6 9.4-33.9 0l-22.6-22.6c-9.4-9.4-9.4-24.6 0-33.9l96.4-96.4-96.4-96.4c-9.4-9.4-9.4-24.6 0-33.9L54.3 103c9.4-9.4 24.6-9.4 33.9 0l136 136c9.5 9.4 9.5 24.6.1 34z"></path></svg>
+		</button>
+		<button class="btn btn-block btn-outline-success btn-fill-white js-signup">
+			Sign up for free <svg class="svg-inline--fa fa-angle-right fa-w-8 fa-fw" aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512"><path fill="currentColor" d="M224.3 273l-136 136c-9.4 9.4-24.6 9.4-33.9 0l-22.6-22.6c-9.4-9.4-9.4-24.6 0-33.9l96.4-96.4-96.4-96.4c-9.4-9.4-9.4-24.6 0-33.9L54.3 103c9.4-9.4 24.6-9.4 33.9 0l136 136c9.5 9.4 9.5 24.6.1 34z"></path></svg>
+		</button>
+	</div>
+
+	<!-- Logged in page -->
+	<div id="account" class="account js-page is-hidden" style="display:none;">
+		<!-- Header -->
+		<header class="account__header js-account-header">
+			<div class="media">
+				<div class="media__img">
+					<img class="brand-logo" src="../images/brand-logo.png" alt="Give as you Live logo" />
+				</div>
+				<div class="media__content account__header__info">
+					<p class="no-margin">Hello <span class="js-name"></span></p>
+					<p class="no-margin">You're supporting <span class="js-cause-name">@@CHARITY_NAME@@</span></p>
+				</div>
+			</div>
+		</header>
+
+		<!-- Tabs + content -->
+		<div>
+			<ul class="tabs js-tabs">
+				<li
+					data-target="#stores"
+					class="js-tab tabs__item tabs__item--active"
+					data-view="stores">
+					Stores
+				</li>
+				<li
+					data-target="#refer-a-friend"
+					class="js-tab tabs__item"
+					data-view="refer-a-friend">
+					Refer a Friend
+				</li>
+				<li data-target="#myaccount"
+					class="js-tab tabs__item"
+					data-view="account">
+					My Account
+				</li>
+			</ul>
+
+			<!--
+				Stores panel, contains 2 sub-views:
+				- 'similar', The current store and similar stores
+				- 'popular', Popular store and store search
+
+				Each contains their own store search with slightly different behaviour.
+			-->
+			<div id="stores" class="js-tab-content tab-content">
+
+				<!-- 'popular' subview -->
+				<div class="js-subview-popular" style="display:none;">
+					<!-- Store search for this sub-view -->
+					<div class="store-search js-store-search-wrapper js-store-search-popular" data-label="popular">
+						<form class="js-store-search">
+							<div class="input-group">
+								<input type="text" class="js-store-search-input form-control" placeholder="Enter a store name" />
+
+								<span class="input-group-btn">
+									<button class="js-store-search-submit btn btn-gaylgrey btn-tight">
+										<svg title="Search" class="svg-inline--fa fa-search fa-w-16 fa-fw" aria-labelledby="svg-inline--fa-title-1" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+											<title id="svg-inline--fa-title-1">Search</title>
+											<path fill="currentColor" d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"></path>
+										</svg>
+									</button>
+								</span>
+							</div>
+						</form>
+
+						<!-- Store search results for this subview -->
+						<div class="store-search__results js-store-search-results"></div>
+					</div>
+				</div>
+
+				<!-- 'similar' subview -->
+				<div class="js-subview-similar" style="display:none;">
+					<!-- Store search for this sub-view -->
+					<div class="store-search js-store-search-wrapper js-store-search-similar" data-label="similar">
+						<form class="js-store-search">
+							<div class="input-group">
+								<input type="text" class="js-store-search-input form-control" placeholder="Enter a store name" />
+
+								<span class="input-group-btn">
+									<button class="js-store-search-submit btn btn-gaylgrey btn-tight">
+										<svg title="Search" class="svg-inline--fa fa-search fa-w-16 fa-fw" aria-labelledby="svg-inline--fa-title-1" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+											<title id="svg-inline--fa-title-1">Search</title>
+											<path fill="currentColor" d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"></path>
+										</svg>
+									</button>
+								</span>
+							</div>
+						</form>
+
+						<!-- Back button, lets user navigation back to store details -->
+						<a href="javascript:void(0)" class="store-search__back btn-link js-store-search-back" style="display:none;">
+							<svg class="svg-inline--fa fa-angle-left fa-w-8 fa-fw" aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512"><path fill="currentColor" d="M31.7 239l136-136c9.4-9.4 24.6-9.4 33.9 0l22.6 22.6c9.4 9.4 9.4 24.6 0 33.9L127.9 256l96.4 96.4c9.4 9.4 9.4 24.6 0 33.9L201.7 409c-9.4 9.4-24.6 9.4-33.9 0l-136-136c-9.5-9.4-9.5-24.6-.1-34z"></path></svg>Back
+						</a>
+
+						<!-- Store search results for this subview -->
+						<div class="store-search__results js-store-search-results"></div>
+					</div>
+
+					<!-- Current store -->
+					<div class="js-current-store"></div>
+
+					<!-- Similar stores -->
+					<div class="store-search__results js-similar-stores"></div>
+				</div>
+
+				<!-- Loading state for all subviews -->
+				<div class="js-subviews-loading"></div>
+			</div>
+
+			<div id="refer-a-friend" class="js-tab-content tab-content" style="display: none;">
+				<div class="js-refer-a-friend-content" style="display: none;">
+					<div class="refer-a-friend">
+						<div class="refer-a-friend__section">
+							<h1>Refer a friend and raise £5 for your charity.</h1>
+							<p>Share Give as you Live Online with your friends, family & colleagues and for each person who signs up and raises £5, we'll donate £5 to <span class="js-cause-name">@@CHARITY_NAME@@</span>.</p>
+						</div>
+
+						<div class="refer-a-friend__section">
+							<h2>Your Unique Share Code is:</h2>
+							<div class="input-group">
+								<input type="text" class="js-refer-url-input form-control" value="@@REFER_URL@@" />
+								<span class="input-group-btn">
+									<button class="js-copy-refer-url-btn btn btn-gaylgrey btn-tight">Copy</button>
+								</span>
+							</div>
+							<div class="js-copy-refer-url-success refer-a-friend__copysuccess">
+								<div class="alert alert--success">
+									Link has been copied to your clipboard.
+								</div>
+							</div>
+						</div>
+						
+						<div class="refer-a-friend__section">
+							<h2>Share with Friends via:</h2>
+							<ul class="social-icon-grid">
+								<li class="js-social-btn social-icon-grid__item social-icon-grid__item--email" data-platform="email">
+									<svg class="svg-inline--fa fa-envelope fa-w-16 fa-fw" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="envelope" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="">
+										<path fill="currentColor" d="M502.3 190.8c3.9-3.1 9.7-.2 9.7 4.7V400c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V195.6c0-5 5.7-7.8 9.7-4.7 22.4 17.4 52.1 39.5 154.1 113.6 21.1 15.4 56.7 47.8 92.2 47.6 35.7.3 72-32.8 92.3-47.6 102-74.1 131.6-96.3 154-113.7zM256 320c23.2.4 56.6-29.2 73.4-41.4 132.7-96.3 142.8-104.7 173.4-128.7 5.8-4.5 9.2-11.5 9.2-18.9v-19c0-26.5-21.5-48-48-48H48C21.5 64 0 85.5 0 112v19c0 7.4 3.4 14.3 9.2 18.9 30.6 23.9 40.7 32.4 173.4 128.7 16.8 12.2 50.2 41.8 73.4 41.4z"></path>
+									</svg>
+								</li>
+								<li class="js-social-btn social-icon-grid__item social-icon-grid__item--facebook" data-platform="facebook">
+									<svg class="svg-inline--fa fa-facebook-f fa-w-16 fa-inverse" aria-labelledby="svg-inline--fa-title-j6FHwnvThECZ" data-prefix="fab" data-icon="facebook-f" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" data-fa-i2svg="">
+										<g transform="translate(160 256)">
+											<g transform="translate(0, 0)  scale(0.5625, 0.5625)  rotate(0 0 0)">
+												<path fill="currentColor" d="M279.14 288l14.22-92.66h-88.91v-60.13c0-25.35 12.42-50.06 52.24-50.06h40.42V6.26S260.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z" transform="translate(-160 -256)"></path>
+											</g>
+										</g>
+									</svg>
+								</li>
+								<li class="js-social-btn social-icon-grid__item social-icon-grid__item--twitter" data-platform="twitter">
+									<svg class="svg-inline--fa fa-twitter fa-w-16 fa-fw" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="twitter" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="">
+										<path fill="currentColor" d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"></path>
+									</svg>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+				<div class="js-refer-a-friend-loading">Loading...please wait.</div>
+			</div>
+
+			<!-- Account panel -->
+			<div id="myaccount" class="js-tab-content tab-content" style="display:none;">
+				<div class="account-options js-account-options"></div>
+				<span class="log-out pseudo-link js-account-logout">Log out</span>
+			</div>
+		</div>
+	</div>
+
+<script type="text/javascript" src="../popup.bundle.js"></script></body>
+</html>

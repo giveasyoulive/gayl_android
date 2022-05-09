@@ -218,7 +218,11 @@ class Components(private val context: Context) {
                 } else {
                     emptyList()
                 },
-                recentHistory = emptyList()
+                recentHistory = emptyList(),
+                // DONATION_REMINDER
+                donationReminderAdverts = core.donationReminderAdvertStorage.cachedAdverts
+                // DONATION_REMINDER
+
             ).run { filterState(blocklistHandler) },
             middlewares = listOf(
                 BlocklistMiddleware(blocklistHandler),

@@ -6,9 +6,11 @@ package org.mozilla.fenix.settings
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.net.toUri
+import mozilla.components.support.base.log.logger.Logger
 import mozilla.components.support.ktx.android.content.appVersionName
 import mozilla.components.support.ktx.android.content.getColorFromAttr
 import org.mozilla.fenix.BuildConfig
@@ -42,7 +44,7 @@ object SupportUtils {
         PRIVATE_BROWSING_MYTHS("common-myths-about-private-browsing"),
         YOUR_RIGHTS("your-rights"),
         TRACKING_PROTECTION("tracking-protection-firefox-android"),
-        WHATS_NEW("whats-new-firefox-preview"),
+        WHATS_NEW("whats-new"),
         OPT_OUT_STUDIES("how-opt-out-studies-firefox-android"),
         SEND_TABS("send-tab-preview"),
         SET_AS_DEFAULT_BROWSER("set-firefox-preview-default"),
@@ -69,10 +71,20 @@ object SupportUtils {
     ): String {
         val escapedTopic = getEncodedTopicUTF8(topic.topicStr)
         // Remove the whitespace so a search is not triggered:
-        val appVersion = context.appVersionName?.replace(" ", "")
+        context.appVersionName?.replace(" ", "")?.let { Log.i("Version", it) }
+
+        val appVersion = "91.3.0"
         val osTarget = "Android"
         val langTag = getLanguageTag(locale)
-        return "https://support.mozilla.org/1/mobile/$appVersion/$osTarget/$langTag/$escapedTopic"
+
+
+        return if(topic == SumoTopic.HELP)
+            "https://help.giveasyoulive.com/hc/en-us"
+        else if(topic == SumoTopic.WHATS_NEW)
+            "https://support.mozilla.org/1/mobile/$appVersion/$osTarget/$langTag/$escapedTopic-firefox-preview"
+        else
+            "https://support.mozilla.org/1/mobile/$appVersion/$osTarget/$langTag/$escapedTopic"
+
     }
 
     /**
@@ -92,7 +104,14 @@ object SupportUtils {
     fun getMozillaPageUrl(page: MozillaPage, locale: Locale = Locale.getDefault()): String {
         val path = page.path
         val langTag = getLanguageTag(locale)
-        return "https://www.mozilla.org/$langTag/$path"
+
+
+        return if(page == MozillaPage.PRIVATE_NOTICE)
+            "https://www.giveasyoulive.com/privacy"
+        else
+            "https://www.mozilla.org/$langTag/$path"
+
+
     }
 
     fun getWhatsNewUrl(context: Context) = getSumoURLForTopic(context, SumoTopic.WHATS_NEW)

@@ -11,8 +11,9 @@ import java.util.Locale
 
 object Config {
     // Synchronized build configuration for all modules
+
     const val compileSdkVersion = 31
-    const val minSdkVersion = 21
+    const val minSdkVersion = 26
     const val targetSdkVersion = 30
 
     @JvmStatic
@@ -64,7 +65,7 @@ object Config {
 
     private val fennecBaseVersionCode by lazy {
         val format = SimpleDateFormat("yyyyMMddHHmmss", Locale.US)
-        val cutoff = format.parse("20141228000000")
+        val cutoff = format.parse("20120101000000")
         val build = Date()
 
         Math.floor((build.time - cutoff.time) / (1000.0 * 60.0 * 60.0)).toInt()

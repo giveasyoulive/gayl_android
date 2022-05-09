@@ -23,6 +23,7 @@ buildscript {
             }
         }
 
+
         if (project.hasProperty("googleRepo")) {
             maven {
                 name "Google"
@@ -34,6 +35,7 @@ buildscript {
                 content {
                     // Improve performance: only check google maven for google deps.
                     includeGroupByRegex RepoMatching.androidx
+                    includeGroupByRegex RepoMatching.comGoogleGms
                     includeGroupByRegex RepoMatching.comGoogleAndroid
                     includeGroupByRegex RepoMatching.comGoogleFirebase
                     includeGroupByRegex RepoMatching.comGoogleTesting
@@ -41,6 +43,7 @@ buildscript {
                 }
             }
         }
+
 
         if (project.hasProperty("centralRepo")) {
             maven {
@@ -53,6 +56,7 @@ buildscript {
                 content {
                     // Improve security: don't search deps with known repos.
                     excludeGroupByRegex RepoMatching.mozilla
+                    excludeGroupByRegex RepoMatching.comGoogleGms
                     excludeGroupByRegex RepoMatching.androidx
                     excludeGroupByRegex RepoMatching.comGoogleAndroid
                     excludeGroupByRegex RepoMatching.comGoogleFirebase
@@ -69,6 +73,7 @@ buildscript {
         classpath Deps.androidx_safeargs
         classpath Deps.osslicenses_plugin
 
+        classpath "com.google.gms:google-services:4.3.10"
         classpath "org.mozilla.components:tooling-glean-gradle:${Versions.mozilla_android_components}"
         classpath "org.mozilla.components:tooling-nimbus-gradle:${Versions.mozilla_android_components}"
 
@@ -113,12 +118,14 @@ allprojects {
                 content {
                     // Improve performance: only check google maven for google deps.
                     includeGroupByRegex RepoMatching.androidx
+                    includeGroupByRegex RepoMatching.comGoogleGms
                     includeGroupByRegex RepoMatching.comGoogleAndroid
                     includeGroupByRegex RepoMatching.comGoogleFirebase
                     includeGroupByRegex RepoMatching.comAndroid
                 }
             }
         }
+
 
         if (project.hasProperty("centralRepo")) {
             maven {
@@ -132,6 +139,7 @@ allprojects {
                     // Improve security: don't search deps with known repos.
                     excludeGroupByRegex RepoMatching.mozilla
                     excludeGroupByRegex RepoMatching.androidx
+                    excludeGroupByRegex RepoMatching.comGoogleGms
                     excludeGroupByRegex RepoMatching.comGoogleAndroid
                     excludeGroupByRegex RepoMatching.comGoogleFirebase
                     excludeGroupByRegex RepoMatching.comAndroid

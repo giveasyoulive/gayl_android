@@ -10,6 +10,7 @@ import mozilla.components.feature.top.sites.TopSite
 import mozilla.components.lib.crash.Crash.NativeCodeCrash
 import mozilla.components.lib.state.State
 import mozilla.components.service.pocket.PocketRecommendedStory
+import org.mozilla.fenix.components.feature.giveasyoulive.model.DonationReminderAdvert
 import org.mozilla.fenix.home.HomeFragment
 import org.mozilla.fenix.home.Mode
 import org.mozilla.fenix.home.pocket.PocketRecommendedStoriesCategory
@@ -60,5 +61,6 @@ data class AppState(
     val pocketStoriesCategories: List<PocketRecommendedStoriesCategory> = emptyList(),
     val pocketStoriesCategoriesSelections: List<PocketRecommendedStoriesSelectedCategory> = emptyList(),
     val messaging: MessagingState = MessagingState(),
+    val donationReminderAdverts: List<DonationReminderAdvert> = emptyList(),
     val pendingDeletionHistoryItems: Set<PendingDeletionHistory> = emptySet(),
 ) : State

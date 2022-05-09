@@ -7,6 +7,7 @@ package org.mozilla.fenix.components.metrics
 sealed class Event {
 
     // Interaction events with extras
+    object DismissedOnboarding : Event()
 
     sealed class Search
 

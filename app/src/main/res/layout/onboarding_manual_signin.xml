@@ -45,12 +45,32 @@
         app:layout_constraintStart_toStartOf="@id/avatar_icon"
         app:layout_constraintTop_toBottomOf="@id/header_text" />
 
-    <Button
-        android:id="@+id/fxa_sign_in_button"
-        style="@style/NeutralOnboardingButton"
-        android:layout_marginTop="10dp"
-        android:text="@string/onboarding_firefox_account_sign_in_1"
-        app:layout_constraintTop_toBottomOf="@id/description_text"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="parent"  />
+    <LinearLayout
+        android:id="@+id/LoginLayout"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:weightSum="2"
+
+        app:layout_constraintTop_toBottomOf="@id/description_text">
+
+        <Button
+            android:id="@+id/fxa_sign_in_button" style="@style/NeutralOnboardingButton"
+            android:layout_marginTop="10dp"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="5dp"
+            android:text="@string/onboarding_dr_sign_in"
+         />
+
+        <Button
+            android:id="@+id/fxa_sign_up_button" style="@style/NeutralOnboardingButton"
+            android:layout_marginTop="10dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:text="@string/onboarding_dr_sign_up"
+             />
+
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

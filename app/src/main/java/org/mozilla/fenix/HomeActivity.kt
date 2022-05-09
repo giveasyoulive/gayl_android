@@ -9,25 +9,25 @@ import android.content.Intent
 import android.content.Intent.ACTION_MAIN
 import android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
 import android.content.res.Configuration
+import android.graphics.Color
+import android.graphics.PixelFormat
 import android.os.Build
 import android.os.Bundle
 import android.os.StrictMode
 import android.os.SystemClock
 import android.text.format.DateUtils
 import android.util.AttributeSet
-import android.view.ActionMode
-import android.view.KeyEvent
-import android.view.LayoutInflater
-import android.view.MotionEvent
-import android.view.View
-import android.view.ViewConfiguration
+import android.view.*
 import android.view.WindowManager.LayoutParams.FLAG_SECURE
+import android.widget.FrameLayout
 import androidx.annotation.CallSuper
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
 import androidx.annotation.VisibleForTesting.PROTECTED
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.widget.Toolbar
+import androidx.customview.widget.ViewDragHelper
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDirections
@@ -42,6 +42,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import mozilla.appservices.places.BookmarkRoot
 import mozilla.components.browser.state.action.ContentAction
+import mozilla.components.browser.state.action.WebExtensionAction
 import mozilla.components.browser.state.search.SearchEngine
 import mozilla.components.browser.state.selector.getNormalOrPrivateTabs
 import mozilla.components.browser.state.state.SessionState
@@ -74,6 +75,7 @@ import org.mozilla.fenix.GleanMetrics.Metrics
 import org.mozilla.fenix.GleanMetrics.StartOnHome
 import org.mozilla.fenix.addons.AddonDetailsFragmentDirections
 import org.mozilla.fenix.addons.AddonPermissionsDetailsFragmentDirections
+import org.mozilla.fenix.addons.WebExtensionActionSidebarFragment
 import org.mozilla.fenix.browser.browsingmode.BrowsingMode
 import org.mozilla.fenix.browser.browsingmode.BrowsingModeManager
 import org.mozilla.fenix.browser.browsingmode.DefaultBrowsingModeManager
@@ -94,6 +96,7 @@ import org.mozilla.fenix.home.intent.OpenBrowserIntentProcessor
 import org.mozilla.fenix.home.intent.OpenSpecificTabIntentProcessor
 import org.mozilla.fenix.home.intent.SpeechProcessingIntentProcessor
 import org.mozilla.fenix.home.intent.StartSearchIntentProcessor
+import org.mozilla.fenix.home.intent.DonationReminderIntentProcessor
 import org.mozilla.fenix.library.bookmarks.BookmarkFragmentDirections
 import org.mozilla.fenix.library.bookmarks.DesktopFolders
 import org.mozilla.fenix.library.history.HistoryFragmentDirections
@@ -128,6 +131,8 @@ import org.mozilla.fenix.trackingprotection.TrackingProtectionPanelDialogFragmen
 import org.mozilla.fenix.utils.BrowsersCache
 import org.mozilla.fenix.utils.Settings
 import java.lang.ref.WeakReference
+import org.mozilla.fenix.perf.Performance.logger
+
 
 /**
  * The main activity of the application. The application is primarily a single Activity (this one)
@@ -171,6 +176,8 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 
     private val externalSourceIntentProcessors by lazy {
         listOf(
+            DonationReminderIntentProcessor(this),
+
             HomeDeepLinkIntentProcessor(this),
             SpeechProcessingIntentProcessor(this, components.core.store),
             StartSearchIntentProcessor(),
@@ -296,6 +303,9 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
             MarkersActivityLifecycleCallbacks.MARKER_NAME, startTimeProfiler, "HomeActivity.onCreate"
         )
         StartupTimeline.onActivityCreateEndHome(this) // DO NOT MOVE ANYTHING BELOW HERE.
+
+
+
     }
 
     private fun checkAndExitPiP() {
@@ -374,6 +384,7 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
             MarkersActivityLifecycleCallbacks.MARKER_NAME, startProfilerTime, "HomeActivity.onStart"
         ) // DO NOT MOVE ANYTHING BELOW THIS addMarker CALL.
     }
+
 
     override fun onStop() {
         super.onStop()
@@ -970,11 +981,93 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
     }
 
     private fun openPopup(webExtensionState: WebExtensionState) {
+
+        if(webExtensionState.id == "gayl_firefox@everyclick.com") {
+            logger.debug("openPopup  (WebExtensionState=$webExtensionState)")
+
+            openSidebar(webExtensionState)
+
+            return
+        }
         val action = NavGraphDirections.actionGlobalWebExtensionActionPopupFragment(
             webExtensionId = webExtensionState.id,
             webExtensionTitle = webExtensionState.name
         )
         navHost.navController.navigate(action)
+    }
+
+
+    private fun openSidebar(webExtensionState: WebExtensionState) {
+
+        val drawerLayout =
+            findViewById<View>(R.id.drawerLy) as DrawerLayout
+
+        // Close draw if open
+        if (drawerLayout.isDrawerOpen(Gravity.RIGHT)) {
+            closeSidebar(drawerLayout)
+            return
+        }
+
+        // Detect click outside sidebar
+        drawerLayout.addDrawerListener(object: DrawerLayout.DrawerListener {
+            override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
+            }
+            override fun onDrawerStateChanged(newState: Int) {
+
+                if(newState == ViewDragHelper.STATE_SETTLING && drawerLayout.isDrawerOpen(Gravity.RIGHT)) {
+                    closeSidebar(drawerLayout)
+                }
+
+            }
+            override fun onDrawerOpened(drawerView: View) {}
+            override fun onDrawerClosed(drawerView: View) {}
+        })
+
+        // Create the drawer with web extension
+        val bundle = Bundle()
+        bundle.putString("webExtensionId", webExtensionState.id)
+        bundle.putString("webExtensionTitle", webExtensionState.name)
+
+        // First time fragment building is slow.
+        var fragment = WebExtensionActionSidebarFragment()
+        fragment.arguments = bundle
+
+        val transaction = supportFragmentManager.beginTransaction()
+        transaction.replace(R.id.right_drawer, fragment)
+        transaction.addToBackStack(null)
+        transaction.commit()
+
+        // Listen for sidebar actions
+        fragment.setSidebarListener(object :
+            WebExtensionActionSidebarFragment.SidebarListener {
+
+            val drawerLayout =
+                findViewById<View>(R.id.drawerLy) as DrawerLayout
+
+            override fun onCloseSidebar() {
+                closeSidebar(drawerLayout)
+            }
+
+            override fun onOpenSidebar() {
+                drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                drawerLayout.openDrawer(Gravity.RIGHT)
+
+            }
+
+        })
+    }
+
+    fun closeSidebar(drawerLayout: DrawerLayout) {
+
+        drawerLayout.closeDrawer(Gravity.RIGHT)
+
+        // Remove the fragment on drawer close
+        supportFragmentManager.findFragmentById(R.id.right_drawer)?.let {
+            supportFragmentManager
+                .beginTransaction()
+                .remove(it)
+                .commit()
+        }
     }
 
     /**
@@ -1055,4 +1148,6 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
         // telemetry purposes.
         const val PWA_RECENTLY_USED_THRESHOLD = DateUtils.DAY_IN_MILLIS * 30L
     }
+
+
 }

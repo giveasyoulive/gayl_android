@@ -112,6 +112,7 @@ import org.mozilla.fenix.home.sessioncontrol.SessionControlView
 import org.mozilla.fenix.home.topsites.DefaultTopSitesView
 import org.mozilla.fenix.nimbus.FxNimbus
 import org.mozilla.fenix.onboarding.FenixOnboarding
+import org.mozilla.fenix.onboarding.DonationReminderDemo
 import org.mozilla.fenix.perf.MarkersFragmentLifecycleCallbacks
 import org.mozilla.fenix.settings.SupportUtils
 import org.mozilla.fenix.settings.SupportUtils.SumoTopic.HELP
@@ -126,6 +127,10 @@ import org.mozilla.fenix.whatsnew.WhatsNew
 import java.lang.ref.WeakReference
 import kotlin.math.min
 import org.mozilla.fenix.GleanMetrics.HomeMenu as HomeMenuMetrics
+import org.mozilla.fenix.components.feature.giveasyoulive.view.DonationReminderAdvertFeature
+import org.mozilla.fenix.components.feature.giveasyoulive.view.DonationReminderAdvertsDefaultView
+import org.mozilla.fenix.components.feature.giveasyoulive.view.DonationReminderAdvertsView
+import org.mozilla.fenix.components.metrics.Event
 
 @Suppress("TooManyFunctions", "LargeClass")
 class HomeFragment : Fragment() {
@@ -164,6 +169,13 @@ class HomeFragment : Fragment() {
         }
     }
 
+
+    private val donationReminderDemo by lazy {
+        requireComponents.strictMode.resetAfter(StrictMode.allowThreadDiskReads()) {
+            DonationReminderDemo(requireContext())
+        }
+    }
+
     private val syncedTabFeature by lazy {
         RecentSyncedTabFeature(
             store = requireComponents.appStore,
@@ -188,6 +200,10 @@ class HomeFragment : Fragment() {
     private val recentSyncedTabFeature = ViewBoundFeatureWrapper<RecentSyncedTabFeature>()
     private val recentBookmarksFeature = ViewBoundFeatureWrapper<RecentBookmarksFeature>()
     private val historyMetadataFeature = ViewBoundFeatureWrapper<RecentVisitsFeature>()
+
+    // DONATION_REMINDER
+    private val donationReminderAdvertFeature = ViewBoundFeatureWrapper<DonationReminderAdvertFeature>()
+    // DONATION_REMINDER
 
     @VisibleForTesting
     internal var getMenuButton: () -> MenuButton? = { binding.menuButton }
@@ -256,6 +272,21 @@ class HomeFragment : Fragment() {
                 view = binding.root
             )
         }
+
+        // DONATION_REMINDER
+        donationReminderAdvertFeature.set(
+            feature = DonationReminderAdvertFeature(
+                view = DonationReminderAdvertsDefaultView(
+                    store = components.appStore,
+                    settings = components.settings
+                ),
+                storage = components.core.donationReminderAdvertStorage
+            ),
+            owner = viewLifecycleOwner,
+            view = binding.root
+        )
+        // DONATION_REMINDER
+
 
         if (requireContext().settings().showTopSitesFeature) {
             topSitesFeature.set(
@@ -398,6 +429,7 @@ class HomeFragment : Fragment() {
         return binding.root
     }
 
+
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
 
@@ -482,6 +514,7 @@ class HomeFragment : Fragment() {
             ToolbarPosition.BOTTOM -> {
             }
         }
+
     }
 
     @Suppress("LongMethod", "ComplexMethod")
@@ -493,6 +526,18 @@ class HomeFragment : Fragment() {
         HomeScreen.homeScreenDisplayed.record(NoExtras())
         HomeScreen.homeScreenViewCount.add()
 
+        if(!donationReminderDemo.donationReinderDemo()) {
+            view.visibility = View.INVISIBLE
+
+            consumeFrom(requireComponents.core.store) {
+                nav(
+                    R.id.homeFragment,
+                    HomeFragmentDirections.actionGlobalOnboardingDonationReminderDemoFragment()
+                )
+            }
+
+            return
+        }
         observeSearchEngineChanges()
         observeSearchEngineNameChanges()
         createHomeMenu(requireContext(), WeakReference(binding.menuButton))

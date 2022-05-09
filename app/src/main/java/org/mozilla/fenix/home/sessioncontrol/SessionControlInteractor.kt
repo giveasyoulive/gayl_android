@@ -177,6 +177,14 @@ interface CustomizeHomeIteractor {
     fun openCustomizeHomePage()
 }
 
+// DONATION_REMINDER
+interface DonationReminderAdvertInteractor {
+    /**
+     * Opens the customize home settings page.
+     */
+    fun openAdvertPage(advertUrl: String)
+}
+// DONATION_REMINDER
 /**
  * Interface for top site related actions in the [SessionControlInteractor].
  */
@@ -271,7 +279,10 @@ class SessionControlInteractor(
     RecentBookmarksInteractor,
     RecentVisitsInteractor,
     CustomizeHomeIteractor,
-    PocketStoriesInteractor {
+    PocketStoriesInteractor,
+    // DONATION_REMINDER
+    DonationReminderAdvertInteractor {
+    // DONATION_REMINDER
 
     override fun onCollectionAddTabTapped(collection: TabCollection) {
         controller.handleCollectionAddTabTapped(collection)
@@ -470,4 +481,9 @@ class SessionControlInteractor(
     override fun onMessageDisplayed(message: Message) {
         controller.handleMessageDisplayed(message)
     }
+
+    override fun openAdvertPage(advertUrl: String) {
+        controller.handlePasteAndGo(advertUrl)
+    }
+
 }

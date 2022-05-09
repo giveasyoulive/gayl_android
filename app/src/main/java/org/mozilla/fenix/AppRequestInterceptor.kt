@@ -16,6 +16,8 @@ import org.mozilla.fenix.GleanMetrics.ErrorPage
 import org.mozilla.fenix.ext.components
 import org.mozilla.fenix.ext.isOnline
 import java.lang.ref.WeakReference
+import android.os.Build.VERSION.RELEASE
+
 
 class AppRequestInterceptor(
     private val context: Context
@@ -41,6 +43,10 @@ class AppRequestInterceptor(
         interceptAmoRequest(uri, isSameDomain, hasUserGesture)?.let { response ->
             return response
         }
+
+        val majorVersion =  org.mozilla.geckoview.BuildConfig.MOZ_APP_VERSION.split(".")[0]
+
+        engineSession.settings.userAgentString = "Mozilla/5.0 (Android $RELEASE; Mobile; DonationReminder; rv:$majorVersion.0) Gecko/$majorVersion.0 Firefox/$majorVersion.0";
 
         return context.components.services.appLinksInterceptor
             .onLoadRequest(

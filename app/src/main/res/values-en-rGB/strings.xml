@@ -266,9 +266,9 @@
     <string name="onboarding_home_screen_section_useful_history_description_2">Revisit your latest searches from your homepage and tabs.</string>
 
     <!-- Onboarding home screen popup dialog, shown on top of the Jump back in section. Firefox is intentionally hardcoded. -->
-    <string name="onboarding_home_screen_jump_back_contextual_hint" tools:ignore="UnusedResources">Your personalised Firefox homepage now makes it easier to pick up where you left off. Find your recent tabs, bookmarks and search results.</string>
+    <!-- Changed for the Donation Reminder - I was unable to override the string !-->
+    <string name="onboarding_home_screen_jump_back_contextual_hint" tools:ignore="UnusedResources">Your personalised homepage now makes it easier to pick up where you left off. Find your recent tabs, bookmarks and search results.</string>
 
-    <!-- Search Widget -->
     <!-- Content description for searching with a widget. The first parameter is the name of the application.-->
     <string name="search_widget_content_description_2">Open a new %1$s tab</string>
     <!-- Text preview for smaller sized widgets -->
@@ -1049,7 +1049,8 @@
     <string name="notification_marketing_channel_name">Marketing</string>
     <!-- Title shown in the notification that pops up to remind the user to set fenix as default browser.
     %1$s is a placeholder that will be replaced by the app name (Fenix). -->
-    <string name="notification_default_browser_title">%1$s is fast and private</string>
+    <!-- Changed for the Donation Reminder - I was unable to override the string !-->
+    <string name="notification_default_browser_title">%1$s is the easiest way to raise</string>
     <!-- Text shown in the notification that pops up to remind the user to set fenix as default browser.
     %1$s is a placeholder that will be replaced by the app name (Fenix). -->
     <string name="notification_default_browser_text">Make %1$s your default browser</string>

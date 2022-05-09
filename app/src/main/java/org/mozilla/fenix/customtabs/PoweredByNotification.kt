@@ -57,7 +57,7 @@ class PoweredByNotification(
                 .setSmallIcon(R.drawable.ic_status_logo)
                 .setContentTitle(applicationContext.getString(R.string.browser_menu_powered_by2, appName))
                 .setBadgeIconType(BADGE_ICON_NONE)
-                .setColor(ContextCompat.getColor(this, R.color.primary_text_light_theme))
+                .setColor(ContextCompat.getColor(this, R.color.photonRed80))
                 .setPriority(NotificationCompat.PRIORITY_MIN)
                 .setShowWhen(false)
                 .setOngoing(true)

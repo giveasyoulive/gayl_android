@@ -58,7 +58,7 @@ enum class PhoneFeature(val androidPermissionsList: Array<String>) : Parcelable 
                     }
                 else -> when (getStatus(sitePermissions, settings)) {
                     SitePermissions.Status.BLOCKED -> R.string.preference_option_phone_feature_blocked
-                    SitePermissions.Status.NO_DECISION -> R.string.preference_option_phone_feature_ask_to_allow
+                    SitePermissions.Status.NO_DECISION -> R.string.preference_option_phone_feature_allowed
                     SitePermissions.Status.ALLOWED -> R.string.preference_option_phone_feature_allowed
                 }
             }

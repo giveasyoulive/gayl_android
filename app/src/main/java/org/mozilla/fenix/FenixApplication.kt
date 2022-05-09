@@ -251,6 +251,10 @@ open class FenixApplication : LocaleAwareApplication(), Provider {
                         components.core.passwordsStorage.warmUp()
                         components.core.autofillStorage.warmUp()
 
+                        // DONATION_REMINDER
+                        components.core.donationReminderAdvertStorage.getAdverts()
+                        // DONATION_REMINDER
+
                         // Populate the top site cache to improve initial load experience
                         // of the home fragment when the app is launched to a tab. The actual
                         // database call is not expensive. However, the additional context
@@ -321,7 +325,7 @@ open class FenixApplication : LocaleAwareApplication(), Provider {
     }
 
     private fun startMetricsIfEnabled() {
-        if (settings().isTelemetryEnabled) {
+            if (settings().isTelemetryEnabled) {
             components.analytics.metrics.start(MetricServiceType.Data)
         }
 

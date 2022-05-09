@@ -18,6 +18,7 @@ import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.feature.app.links.AppLinksUseCases
 import mozilla.components.lib.state.ext.flowScoped
 import mozilla.components.support.base.feature.LifecycleAwareFeature
+import mozilla.components.support.base.log.logger.Logger
 import mozilla.components.support.ktx.kotlin.tryGetHostFromUrl
 import mozilla.components.support.ktx.kotlinx.coroutines.flow.ifAnyChanged
 import org.mozilla.fenix.R
@@ -78,17 +79,13 @@ class OpenInAppOnboardingObserver(
     }
 
     private fun maybeShowOpenInAppBanner(url: String, loading: Boolean) {
-        if (loading || settings.openLinksInExternalApp || !settings.shouldShowOpenInAppCfr) {
-            return
-        }
 
-        val appLink = appLinksUseCases.appLinkRedirect
-        if (appLink(url).hasExternalApp()) {
-            infoBanner = createInfoBanner()
-            infoBanner?.showBanner()
-            sessionDomainForDisplayedBanner = url.tryGetHostFromUrl()
-            settings.shouldShowOpenInAppBanner = false
-        }
+        // Don't display OpenInApp Banner - user can use settings in menu instead
+        Logger.info(url)
+        Logger.info(loading.toString())
+
+        return
+
     }
 
     @VisibleForTesting

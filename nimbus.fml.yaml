@@ -4,6 +4,8 @@ channels:
   - beta
   - nightly
   - developer
+  - donationReminderRelease
+  - donationReminderDebug
 features:
   homescreen:
     description: The homescreen that the user goes to when they press home or new tab.

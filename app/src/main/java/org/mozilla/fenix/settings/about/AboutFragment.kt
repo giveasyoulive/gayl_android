@@ -128,11 +128,10 @@ class AboutFragment : Fragment(), AboutPageListener {
             ""
         }
 
-        val content = getString(R.string.about_content, headerAppName)
-        val buildDate = BuildConfig.BUILD_DATE
+         val buildDate = BuildConfig.BUILD_DATE
 
         binding.aboutText.text = aboutText
-        binding.aboutContent.text = content
+        binding.aboutContent.text = ""
         binding.buildDate.text = buildDate
     }
 
@@ -142,21 +141,10 @@ class AboutFragment : Fragment(), AboutPageListener {
         return listOf(
             AboutPageItem(
                 AboutItem.ExternalLink(
-                    WHATS_NEW,
-                    SupportUtils.getWhatsNewUrl(context)
-                ),
-                getString(R.string.about_whats_new, getString(R.string.app_name))
-            ),
-            AboutPageItem(
-                AboutItem.ExternalLink(
                     SUPPORT,
                     SupportUtils.getSumoURLForTopic(context, SupportUtils.SumoTopic.HELP)
                 ),
                 getString(R.string.about_support)
-            ),
-            AboutPageItem(
-                AboutItem.Crashes,
-                getString(R.string.about_crashes)
             ),
             AboutPageItem(
                 AboutItem.ExternalLink(
@@ -164,13 +152,6 @@ class AboutFragment : Fragment(), AboutPageListener {
                     SupportUtils.getMozillaPageUrl(SupportUtils.MozillaPage.PRIVATE_NOTICE)
                 ),
                 getString(R.string.about_privacy_notice)
-            ),
-            AboutPageItem(
-                AboutItem.ExternalLink(
-                    RIGHTS,
-                    SupportUtils.getSumoURLForTopic(context, SupportUtils.SumoTopic.YOUR_RIGHTS)
-                ),
-                getString(R.string.about_know_your_rights)
             ),
             AboutPageItem(
                 AboutItem.ExternalLink(LICENSING_INFO, ABOUT_LICENSE_URL),

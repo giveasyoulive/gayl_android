@@ -87,6 +87,10 @@
         app:destination="@id/historyFragment" />
 
     <action
+        android:id="@+id/action_global_onboardingDonationReminderDemoFragment"
+        app:destination="@id/onboardingDonationReminderDemoFragment" />
+
+    <action
         android:id="@+id/action_global_downloadsFragment"
         app:destination="@id/downloadsFragment" />
     <action
@@ -261,6 +265,12 @@
             app:nullable="true" />
     </fragment>
 
+    <fragment
+        android:id="@+id/onboardingDonationReminderDemoFragment"
+        android:name="org.mozilla.fenix.library.donationreminder.DemoFragment"
+        android:label="How it works"
+
+        />
     <fragment
         android:id="@+id/historyFragment"
         android:name="org.mozilla.fenix.library.history.HistoryFragment"

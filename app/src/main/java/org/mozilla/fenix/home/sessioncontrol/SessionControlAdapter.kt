@@ -29,12 +29,7 @@ import org.mozilla.fenix.home.recenttabs.view.RecentTabViewHolder
 import org.mozilla.fenix.home.recenttabs.view.RecentTabsHeaderViewHolder
 import org.mozilla.fenix.home.recentvisits.view.RecentVisitsHeaderViewHolder
 import org.mozilla.fenix.home.recentvisits.view.RecentlyVisitedViewHolder
-import org.mozilla.fenix.home.sessioncontrol.viewholders.CollectionHeaderViewHolder
-import org.mozilla.fenix.home.sessioncontrol.viewholders.CollectionViewHolder
-import org.mozilla.fenix.home.sessioncontrol.viewholders.CustomizeHomeButtonViewHolder
-import org.mozilla.fenix.home.sessioncontrol.viewholders.NoCollectionsMessageViewHolder
-import org.mozilla.fenix.home.sessioncontrol.viewholders.PrivateBrowsingDescriptionViewHolder
-import org.mozilla.fenix.home.sessioncontrol.viewholders.TabInCollectionViewHolder
+import org.mozilla.fenix.home.sessioncontrol.viewholders.*
 import org.mozilla.fenix.home.sessioncontrol.viewholders.onboarding.MessageCardViewHolder
 import org.mozilla.fenix.home.sessioncontrol.viewholders.onboarding.OnboardingFinishViewHolder
 import org.mozilla.fenix.home.sessioncontrol.viewholders.onboarding.OnboardingHeaderViewHolder
@@ -175,6 +170,10 @@ sealed class AdapterItem(@LayoutRes val viewType: Int) {
 
     object BottomSpacer : AdapterItem(BottomSpacerViewHolder.LAYOUT_ID)
 
+    // DONATION_REMINDER
+    object DonationReminderAdverts : AdapterItem(DonationReminderAdvertViewHolder.LAYOUT_ID)
+    // DONATION_REMINDER
+
     /**
      * True if this item represents the same value as other. Used by [AdapterItemDiffCallback].
      */
@@ -212,6 +211,15 @@ class SessionControlAdapter(
     @SuppressWarnings("ComplexMethod", "LongMethod", "ReturnCount")
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         when (viewType) {
+
+            // DONATION_REMINDER
+            DonationReminderAdvertViewHolder.LAYOUT_ID -> return DonationReminderAdvertViewHolder(
+                composeView = ComposeView(parent.context),
+                viewLifecycleOwner,
+                interactor = interactor
+            )
+            // DONATION_REMINDER
+
             CustomizeHomeButtonViewHolder.LAYOUT_ID -> return CustomizeHomeButtonViewHolder(
                 composeView = ComposeView(parent.context),
                 viewLifecycleOwner = viewLifecycleOwner,
@@ -324,7 +332,11 @@ class SessionControlAdapter(
             is PrivateBrowsingDescriptionViewHolder,
             is PocketCategoriesViewHolder,
             is PocketRecommendationsHeaderViewHolder,
-            is PocketStoriesViewHolder -> {
+            is PocketStoriesViewHolder,
+
+            // DONATION_REMINDER
+            is DonationReminderAdvertViewHolder-> {
+            // DONATION_REMINDER
                 // no op
                 // This previously called "composeView.disposeComposition" which would have the
                 // entire Composable destroyed and recreated when this View is scrolled off or on screen again.
@@ -384,10 +396,14 @@ class SessionControlAdapter(
             is RecentlyVisitedViewHolder,
             is RecentBookmarksViewHolder,
             is RecentTabViewHolder,
-            is PocketStoriesViewHolder -> {
+            is PocketStoriesViewHolder,
+            // DONATION_REMINDER
+            is DonationReminderAdvertViewHolder-> {
+            // DONATION_REMINDER
                 // no-op. This ViewHolder receives the HomeStore as argument and will observe that
                 // without the need for us to manually update from here the data to be displayed.
             }
+
         }
     }
 }

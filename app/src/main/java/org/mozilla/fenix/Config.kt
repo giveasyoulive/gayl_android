@@ -55,6 +55,8 @@ object Config {
         "nightly" -> ReleaseChannel.Nightly
         "beta" -> ReleaseChannel.Beta
         "release" -> ReleaseChannel.Release
+        "donationReminderDebug" -> ReleaseChannel.Debug
+        "donationReminderRelease" -> ReleaseChannel.Release
         else -> {
             throw IllegalStateException("Unknown build type: ${BuildConfig.BUILD_TYPE}")
         }

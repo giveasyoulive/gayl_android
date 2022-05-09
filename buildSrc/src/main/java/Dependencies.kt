@@ -270,6 +270,7 @@ object RepoMatching {
     const val mozilla = "org\\.mozilla\\..*"
     const val androidx = "androidx\\..*"
     const val comAndroid = "com\\.android.*"
+    const val comGoogleGms= "com\\.google\\.gms"
     const val comGoogleFirebase = "com\\.google\\.firebase"
     const val comGoogleTesting = "com\\.google\\.testing\\..*"
 
