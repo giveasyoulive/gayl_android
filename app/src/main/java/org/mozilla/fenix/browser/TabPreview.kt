@@ -22,7 +22,7 @@ import org.mozilla.fenix.ext.settings
 import org.mozilla.fenix.theme.ThemeManager
 import kotlin.math.max
 
-class TabPreview @JvmOverloads constructor(
+class   TabPreview @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyle: Int = 0

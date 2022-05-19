@@ -779,7 +779,9 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
         historyMetadata: HistoryMetadataKey? = null
     ) {
         openToBrowser(from, customTabSessionId)
-        load(searchTermOrURL, newTab, engine, forceSearch, flags, requestDesktopMode, historyMetadata)
+
+        load(if(searchTermOrURL == "about:license")  "https://www.giveasyoulive.com/app_android_license.html" else searchTermOrURL, newTab, engine, forceSearch, flags, requestDesktopMode, historyMetadata)
+
     }
 
     fun openToBrowser(from: BrowserDirection, customTabSessionId: String? = null) {
