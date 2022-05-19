@@ -7,7 +7,6 @@ package org.mozilla.fenix.home.sessioncontrol
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LifecycleOwner
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import mozilla.components.feature.tab.collections.TabCollection
@@ -215,13 +214,6 @@ class SessionControlView(
 
                 }
             }
-            val itemTouchHelper =
-                ItemTouchHelper(
-                    SwipeToDeleteCallback(
-                        interactor
-                    )
-                )
-            itemTouchHelper.attachToRecyclerView(this)
         }
     }
 
