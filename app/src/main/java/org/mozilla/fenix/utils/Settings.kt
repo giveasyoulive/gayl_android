@@ -243,12 +243,12 @@ class Settings(private val appContext: Context) : PreferencesHolder {
 
     val isTelemetryEnabled by booleanPreference(
         appContext.getPreferenceKey(R.string.pref_key_telemetry),
-        default = true
+        default = false
     )
 
     val isMarketingTelemetryEnabled by booleanPreference(
         appContext.getPreferenceKey(R.string.pref_key_marketing_telemetry),
-        default = true
+        default = false
     )
 
     var isExperimentationEnabled by booleanPreference(
