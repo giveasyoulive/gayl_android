@@ -29,6 +29,7 @@ import mozilla.components.lib.push.firebase.AbstractFirebasePushService
 import mozilla.components.support.base.ids.SharedIdsHelper
 import org.mozilla.fenix.IntentReceiverActivity
 import org.mozilla.fenix.R
+import org.mozilla.fenix.utils.IntentUtils
 import java.io.IOException
 import java.net.URL
 
@@ -82,7 +83,7 @@ class FirebasePushService : AbstractFirebasePushService() {
                 NOTIFICATION_PENDING_INTENT_TAG
             ),
             intent,
-            PendingIntent.FLAG_UPDATE_CURRENT
+            IntentUtils.defaultIntentPendingFlags or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
         with(applicationContext) {

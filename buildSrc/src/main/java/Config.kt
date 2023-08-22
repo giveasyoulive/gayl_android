@@ -14,7 +14,7 @@ object Config {
 
     const val compileSdkVersion = 31
     const val minSdkVersion = 26
-    const val targetSdkVersion = 30
+    const val targetSdkVersion = 33
 
     @JvmStatic
     private fun generateDebugVersionName(): String {
